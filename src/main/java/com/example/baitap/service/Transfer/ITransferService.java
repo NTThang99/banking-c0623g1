@@ -6,5 +6,4 @@ import com.example.baitap.service.IGeneralService;
 import java.util.List;
 
 public interface ITransferService extends IGeneralService<Transfer, Long> {
-    List<Transfer> findAll();
 }

@@ -8,6 +8,7 @@ import com.example.baitap.service.Transfer.TransferService;
 import com.example.baitap.service.customer.CustomerService;
 import com.example.baitap.service.deposit.DepositService;
 import com.example.baitap.service.withdraw.WithdrawService;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +16,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/customers")
+@AllArgsConstructor
 public class CustomerController {
-    private final CustomerService customerService = new CustomerService();
-    private final TransferService transferService = new TransferService();
-    private final DepositService depositService = new DepositService();
-    private final WithdrawService withdrawService = new WithdrawService();
+    private final CustomerService customerService;
+    private final TransferService transferService;
+    private final DepositService depositService;
+    private final WithdrawService withdrawService;
 
     @GetMapping("")
     public String showListPage(Model model) {
@@ -41,8 +44,8 @@ public class CustomerController {
 
     @GetMapping("/edit/{customerId}")
     public String showEditPage(@PathVariable Long customerId, Model model){
-        Customer customer = customerService.findById(customerId);
-        model.addAttribute("customerUpdate", customer);
+        Optional<Customer> customer = customerService.findById(customerId);
+        model.addAttribute("customerUpdate", customer.get());
 
         return "customer/edit";
     }
@@ -58,7 +61,8 @@ public class CustomerController {
 
     @GetMapping("/deposit/{customerId}")
     public String showDepositPage(@PathVariable Long customerId, Model model){
-        Customer customer = customerService.findById(customerId);
+        Optional<Customer> customerOptional = customerService.findById(customerId);
+        Customer customer = customerOptional.get();
         Deposit deposit = new Deposit();
         deposit.setCustomer(customer);
         model.addAttribute("deposit", deposit);
@@ -68,7 +72,8 @@ public class CustomerController {
 
     @GetMapping("/withdraw/{customerId}")
     public String showWithdrawPage(@PathVariable Long customerId, Model model){
-        Customer customer = customerService.findById(customerId);
+        Optional<Customer> customerOptional = customerService.findById(customerId);
+        Customer customer = customerOptional.get();
         Withdraw withdraw = new Withdraw();
         withdraw.setCustomer(customer);
         model.addAttribute("withdraw", withdraw);
@@ -78,7 +83,8 @@ public class CustomerController {
 
     @GetMapping("/transfer/{senderId}")
     public String showTransferPage(@PathVariable Long senderId, Model model){
-        Customer sender = customerService.findById(senderId);
+        Optional<Customer> customerOptional = customerService.findById(senderId);
+        Customer sender = customerOptional.get();
         List<Customer> recipients = customerService.findAllWithoutId(senderId);
         Transfer transfer = new Transfer();
         transfer.setSender(sender);
@@ -90,7 +96,7 @@ public class CustomerController {
 
     @GetMapping("/history")
     public String showHistoryTransferPage(Model model){
-        List<Transfer> transfers = transferService.findAll();
+        List<Transfer> transfers = transferService.findAll(false);
         model.addAttribute("transfers", transfers);
 
         return "banking/history";
@@ -149,10 +155,11 @@ public class CustomerController {
 
     @PostMapping ("/deposit/{customerId}")
     public String depositCustomer(@PathVariable Long customerId, @ModelAttribute Deposit deposit, Model model, RedirectAttributes redirectAttributes){
-        Customer customer = customerService.findById(customerId);
+        Optional<Customer> customerOptional = customerService.findById(customerId);
+        Customer customer = customerOptional.get();
         deposit.setCustomer(customer);
 
-        if (deposit.getTransactionAmount().compareTo(BigDecimal.ZERO) == 0) {
+        if (deposit.getTransactionAmount().compareTo(BigDecimal.ZERO) == 0 || deposit.getTransactionAmount() == null) {
             model.addAttribute("success", false);
             model.addAttribute("message", "Customer's balance is not enough to make a deposit");
             model.addAttribute("deposit", deposit);
@@ -169,10 +176,11 @@ public class CustomerController {
 
     @PostMapping ("/withdraw/{customerId}")
     public String withdrawCustomer(@PathVariable Long customerId, @ModelAttribute Withdraw withdraw, Model model, RedirectAttributes redirectAttributes) {
-        Customer customer = customerService.findById(customerId);
+        Optional<Customer> customerOptional = customerService.findById(customerId);
+        Customer customer = customerOptional.get();
         withdraw.setCustomer(customer);
 
-        if (withdraw.getTransactionAmount().compareTo(BigDecimal.ZERO) == 0) {
+        if (withdraw.getTransactionAmount().compareTo(BigDecimal.ZERO) == 0 || withdraw.getTransactionAmount() == null) {
             model.addAttribute("success", false);
             model.addAttribute("message", "Withdraw amount must be greater than 0");
             model.addAttribute("withdraw", withdraw);
@@ -196,8 +204,10 @@ public class CustomerController {
     @PostMapping ("/transfer/{senderId}")
     public String transferCustomer(@PathVariable Long senderId, @ModelAttribute Transfer transfer, Model model, RedirectAttributes redirectAttributes){
         List<Customer> recipients = customerService.findAllWithoutId(senderId);
-        Customer customer = customerService.findById(senderId);
-        Customer recipient = customerService.findById(transfer.getRecipient().getId());
+        Optional<Customer> customerOptional = customerService.findById(senderId);
+        Customer customer = customerOptional.get();
+        Optional<Customer> customerRecipient = customerService.findById(transfer.getRecipient().getId());
+        Customer recipient = customerRecipient.get();
         transfer.setSender(customer);
         transfer.setRecipient(recipient);
 

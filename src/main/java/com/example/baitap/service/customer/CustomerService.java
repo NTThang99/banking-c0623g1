@@ -28,7 +28,7 @@ public class CustomerService implements ICustomerService{
     private TransferService transferService;
     @Override
     public List<Customer> findAll(boolean deleted) {
-        return customerRepository.findAll();
+        return customerRepository.findCustomerByDeleted(deleted);
     }
 
     @Override

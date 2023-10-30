@@ -43,7 +43,7 @@ public class CustomerController {
     }
 
     @GetMapping("/edit/{customerId}")
-    public String showEditPage(@PathVariable Long customerId, Model model){
+    public String showEditPage(@PathVariable Long customerId, Model model) {
         Optional<Customer> customer = customerService.findById(customerId);
         model.addAttribute("customerUpdate", customer.get());
 
@@ -51,16 +51,13 @@ public class CustomerController {
     }
 
     @GetMapping("/delete/{customerId}")
-    public String deleteCustomer(@PathVariable Long customerId, RedirectAttributes redirectAttributes){
-        customerService.removeById(customerId);
-        redirectAttributes.addFlashAttribute("success", true);
-        redirectAttributes.addFlashAttribute("message", "Deleted successfully");
-
-        return "redirect:/customers";
+    public String delete(@PathVariable Long customerId, Model model) {
+        model.addAttribute("customer", customerService.findById(customerId));
+        return "customer/delete";
     }
 
     @GetMapping("/deposit/{customerId}")
-    public String showDepositPage(@PathVariable Long customerId, Model model){
+    public String showDepositPage(@PathVariable Long customerId, Model model) {
         Optional<Customer> customerOptional = customerService.findById(customerId);
         Customer customer = customerOptional.get();
         Deposit deposit = new Deposit();
@@ -71,7 +68,7 @@ public class CustomerController {
     }
 
     @GetMapping("/withdraw/{customerId}")
-    public String showWithdrawPage(@PathVariable Long customerId, Model model){
+    public String showWithdrawPage(@PathVariable Long customerId, Model model) {
         Optional<Customer> customerOptional = customerService.findById(customerId);
         Customer customer = customerOptional.get();
         Withdraw withdraw = new Withdraw();
@@ -82,7 +79,7 @@ public class CustomerController {
     }
 
     @GetMapping("/transfer/{senderId}")
-    public String showTransferPage(@PathVariable Long senderId, Model model){
+    public String showTransferPage(@PathVariable Long senderId, Model model) {
         Optional<Customer> customerOptional = customerService.findById(senderId);
         Customer sender = customerOptional.get();
         List<Customer> recipients = customerService.findAllWithoutId(senderId);
@@ -95,7 +92,7 @@ public class CustomerController {
     }
 
     @GetMapping("/history")
-    public String showHistoryTransferPage(Model model){
+    public String showHistoryTransferPage(Model model) {
         List<Transfer> transfers = transferService.findAll(false);
         model.addAttribute("transfers", transfers);
 
@@ -103,7 +100,7 @@ public class CustomerController {
     }
 
     @GetMapping("/history-deposit")
-    public String showHistoryDepositPage(Model model){
+    public String showHistoryDepositPage(Model model) {
         List<Deposit> deposits = depositService.findAll(false);
         model.addAttribute("deposits", deposits);
 
@@ -111,7 +108,7 @@ public class CustomerController {
     }
 
     @GetMapping("/history-withdraw")
-    public String showHistoryWithdrawPage(Model model){
+    public String showHistoryWithdrawPage(Model model) {
         List<Withdraw> withdraws = withdrawService.findAll(false);
         model.addAttribute("withdraws", withdraws);
 
@@ -125,8 +122,7 @@ public class CustomerController {
             model.addAttribute("message", "Created unsuccessful");
 
             return "customer/create";
-        }
-        else {
+        } else {
             customerService.create(customer);
             redirectAttributes.addFlashAttribute("success", true);
             redirectAttributes.addFlashAttribute("message", "Created successfully");
@@ -135,16 +131,24 @@ public class CustomerController {
         }
     }
 
-    @PostMapping ("/edit/{customerId}")
-    public String updateCustomer(@ModelAttribute Customer customer, @PathVariable Long customerId, Model model,RedirectAttributes redirectAttributes){
+    @PostMapping("/delete/{customerId}")
+    public String deleteCustomer(@PathVariable Long customerId, RedirectAttributes redirectAttributes) {
+        customerService.removeById(customerId);
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("message", "Deleted successfully");
+        return "redirect:/customers";
+    }
+
+
+    @PostMapping("/edit/{customerId}")
+    public String updateCustomer(@ModelAttribute Customer customer, @PathVariable Long customerId, Model model, RedirectAttributes redirectAttributes) {
         if (customer.getFullName().length() == 0) {
             model.addAttribute("success", false);
             model.addAttribute("message", "Updated unsuccessful");
             model.addAttribute("customerUpdate", customer);
 
             return "customer/edit";
-        }
-        else {
+        } else {
             customerService.update(customerId, customer);
             redirectAttributes.addFlashAttribute("success", true);
             redirectAttributes.addFlashAttribute("message", "Updated successfully");
@@ -153,8 +157,8 @@ public class CustomerController {
         }
     }
 
-    @PostMapping ("/deposit/{customerId}")
-    public String depositCustomer(@PathVariable Long customerId, @ModelAttribute Deposit deposit, Model model, RedirectAttributes redirectAttributes){
+    @PostMapping("/deposit/{customerId}")
+    public String depositCustomer(@PathVariable Long customerId, @ModelAttribute Deposit deposit, Model model, RedirectAttributes redirectAttributes) {
         Optional<Customer> customerOptional = customerService.findById(customerId);
         Customer customer = customerOptional.get();
         deposit.setCustomer(customer);
@@ -164,8 +168,7 @@ public class CustomerController {
             model.addAttribute("message", "Customer's balance is not enough to make a deposit");
             model.addAttribute("deposit", deposit);
             return "banking/deposit";
-        }
-        else {
+        } else {
             customerService.deposit(deposit);
             redirectAttributes.addFlashAttribute("success", true);
             redirectAttributes.addFlashAttribute("message", "Deposit successfully");
@@ -174,7 +177,7 @@ public class CustomerController {
         }
     }
 
-    @PostMapping ("/withdraw/{customerId}")
+    @PostMapping("/withdraw/{customerId}")
     public String withdrawCustomer(@PathVariable Long customerId, @ModelAttribute Withdraw withdraw, Model model, RedirectAttributes redirectAttributes) {
         Optional<Customer> customerOptional = customerService.findById(customerId);
         Customer customer = customerOptional.get();
@@ -201,8 +204,8 @@ public class CustomerController {
         }
     }
 
-    @PostMapping ("/transfer/{senderId}")
-    public String transferCustomer(@PathVariable Long senderId, @ModelAttribute Transfer transfer, Model model, RedirectAttributes redirectAttributes){
+    @PostMapping("/transfer/{senderId}")
+    public String transferCustomer(@PathVariable Long senderId, @ModelAttribute Transfer transfer, Model model, RedirectAttributes redirectAttributes) {
         List<Customer> recipients = customerService.findAllWithoutId(senderId);
         Optional<Customer> customerOptional = customerService.findById(senderId);
         Customer customer = customerOptional.get();

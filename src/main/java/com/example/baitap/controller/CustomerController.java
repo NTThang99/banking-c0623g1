@@ -58,13 +58,13 @@ public class CustomerController {
 
     @GetMapping("/deposit/{customerId}")
     public String showDepositPage(@PathVariable Long customerId, Model model) {
-        Optional<Customer> customerOptional = customerService.findById(customerId);
-        Customer customer = customerOptional.get();
-        Deposit deposit = new Deposit();
-        deposit.setCustomer(customer);
-        model.addAttribute("deposit", deposit);
 
-        return "banking/deposit";
+            Optional<Customer> customerOptional = customerService.findById(customerId);
+            Customer customer = customerOptional.get();
+            Deposit deposit = new Deposit();
+            deposit.setCustomer(customer);
+            model.addAttribute("deposit", deposit);
+            return "banking/deposit";
     }
 
     @GetMapping("/withdraw/{customerId}")

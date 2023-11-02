@@ -18,7 +18,7 @@ table thead tr th {
     text-align: center !important;
 }
 
-.table>:not(caption)>*>* {
+.table > :not(caption) > * > * {
     text-align: center !important;
 }
 
@@ -50,4 +50,17 @@ footer.error {
 
 .form-label {
     font-weight: bold !important;
+}
+
+.error-style {
+    margin: 10px;
+    color: #fa0d0d;
+}
+.animate-button {
+    transition: transform 0.3s ease;
+}
+
+
+.animate-button:hover {
+    transform: scale(1.1);
 }

@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Deposit Money</title>
+    <link href="path-to-your-custom-styles.css" rel="stylesheet"> <!-- Add the link to your custom CSS file -->
     <th:block th:replace="layout/head :: head"/>
 </head>
 <body>
@@ -42,12 +43,17 @@
                 <div class="col-lg-6">
                     <label for="transactionAmount" class="form-label">Transaction Amount ($)</label>
                     <input type="number" class="form-control" id="transactionAmount" th:field="*{transactionAmount}" min="0" value="0">
+                    <div th:if="${error == true}" class="error-style">
+                        <ul class="list-unstyled">
+                            <li th:each="err : ${#fields.errors('transactionAmount')}" th:text="${err}"></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
             <div class="row pt-3">
                 <div class="col-lg-3">
-                    <button type="submit" class="btn btn-outline-success">
+                    <button type="submit" class="btn btn-outline-success animate-button"> <!-- Add the "animate-button" class -->
                         <i class="fas fa-plus"></i>
                         Deposit
                     </button>
@@ -67,7 +73,7 @@
     </footer>
 </th:block>
 
-<script src="/assets/js/custom-scrip.js"></script>
+<script src="/assets/js/custom-script.js"></script> <!-- Corrected the script file path -->
 
 </body>
 </html>

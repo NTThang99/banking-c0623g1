@@ -1,6 +1,7 @@
 package com.example.baitap.service.customer;
 
 import com.example.baitap.model.Customer;
+import com.example.baitap.exception.ResourceNotFoundException;
 import com.example.baitap.model.Deposit;
 import com.example.baitap.model.Transfer;
 import com.example.baitap.model.Withdraw;
@@ -28,12 +29,13 @@ public class CustomerService implements ICustomerService{
     private TransferService transferService;
     @Override
     public List<Customer> findAll(boolean deleted) {
-        return customerRepository.findCustomerByDeleted(deleted);
+        return customerRepository.findCustomerByDeleted(false);
     }
 
     @Override
     public Optional<Customer> findById(Long id) {
-        return customerRepository.findById(id);
+        return Optional.ofNullable(customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Sorry, no customer found with the Id :" + id)));
     }
 
     @Override
@@ -111,7 +113,7 @@ public class CustomerService implements ICustomerService{
 
     @Override
     public List<Customer> findAllWithoutId(Long id) {
-        List<Customer> allCustomers = customerRepository.findAll();
+        List<Customer> allCustomers = customerRepository.findCustomerByDeleted(false);
         List<Customer> customers = allCustomers.stream()
                 .filter(customer -> !customer.getId().equals(id))
                 .collect(Collectors.toList());
